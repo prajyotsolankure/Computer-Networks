@@ -1,83 +1,64 @@
-import java.util.Scanner;
+import java.util.*;
 
-public class Ford {
-    private int D[];
-    private int num_ver;
-    public static final int MAX_VALUE = 999;
+public class BellmanFord {
 
-    public Ford(int num_ver) {
-        this.num_ver = num_ver;
-        D = new int[num_ver + 1];
-    }
-
-    public void BellmanFordEvaluation(int source, int A[][]) {
-        // Initialize distances
-        for (int node = 1; node <= num_ver; node++) {
-            D[node] = MAX_VALUE;
-        }
-        D[source] = 0;
-
-        // Relax edges (num_ver - 1) times
-        for (int node = 1; node <= num_ver - 1; node++) {
-            for (int sn = 1; sn <= num_ver; sn++) {
-                for (int dn = 1; dn <= num_ver; dn++) {
-                    if (A[sn][dn] != MAX_VALUE) {
-                        if (D[dn] > D[sn] + A[sn][dn])
-                            D[dn] = D[sn] + A[sn][dn];
-                    }
-                }
-            }
-        }
-
-        // Check for negative edge cycle
-        for (int sn = 1; sn <= num_ver; sn++) {
-            for (int dn = 1; dn <= num_ver; dn++) {
-                if (A[sn][dn] != MAX_VALUE) {
-                    if (D[dn] > D[sn] + A[sn][dn]) {
-                        System.out.println("The graph contains a negative edge cycle!");
-                        return;
-                    }
-                }
-            }
-        }
-
-        // Display shortest distances
-        System.out.println("\nShortest distances from source vertex " + source + ":");
-        for (int vertex = 1; vertex <= num_ver; vertex++) {
-            System.out.println("Distance of source " + source + " to " + vertex + " is " + D[vertex]);
-        }
-    }
+    static final int INF = 999;
 
     public static void main(String[] args) {
-        int num_ver, source;
-        Scanner scanner = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
 
-        System.out.print("Enter the number of vertices: ");
-        num_ver = scanner.nextInt();
+        System.out.print("Enter number of vertices: ");
+        int n = sc.nextInt();
 
-        int A[][] = new int[num_ver + 1][num_ver + 1];
+        int[][] cost = new int[n + 1][n + 1];
+        int[] dist = new int[n + 1];
 
-        System.out.println("Enter the adjacency matrix:");
-        for (int sn = 1; sn <= num_ver; sn++) {
-            for (int dn = 1; dn <= num_ver; dn++) {
-                A[sn][dn] = scanner.nextInt();
+        // Input adjacency matrix
+        System.out.println("Enter adjacency matrix:");
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
+                cost[i][j] = sc.nextInt();
 
-                if (sn == dn) {
-                    A[sn][dn] = 0;
-                    continue;
-                }
-                if (A[sn][dn] == 0) {
-                    A[sn][dn] = MAX_VALUE;
+                if (i == j) cost[i][j] = 0;
+                else if (cost[i][j] == 0) cost[i][j] = INF;
+            }
+        }
+
+        System.out.print("Enter source vertex: ");
+        int src = sc.nextInt();
+
+        // Step 1: initialize distances
+        Arrays.fill(dist, INF);
+        dist[src] = 0;
+
+        // Step 2: relax all edges (n-1) times
+        for (int k = 1; k <= n - 1; k++) {
+            for (int u = 1; u <= n; u++) {
+                for (int v = 1; v <= n; v++) {
+                    if (cost[u][v] != INF && dist[v] > dist[u] + cost[u][v]) {
+                        dist[v] = dist[u] + cost[u][v];
+                    }
                 }
             }
         }
 
-        System.out.print("Enter the source vertex: ");
-        source = scanner.nextInt();
+        // Step 3: check negative cycle
+        for (int u = 1; u <= n; u++) {
+            for (int v = 1; v <= n; v++) {
+                if (cost[u][v] != INF && dist[v] > dist[u] + cost[u][v]) {
+                    System.out.println("Graph contains negative cycle!");
+                    sc.close();
+                    return;
+                }
+            }
+        }
 
-        Ford b = new Ford(num_ver);
-        b.BellmanFordEvaluation(source, A);
+        // Output
+        System.out.println("\nShortest distances from " + src + ":");
+        for (int i = 1; i <= n; i++) {
+            System.out.println(src + " → " + i + " = " + dist[i]);
+        }
 
-        scanner.close();
+        sc.close();
     }
 }
