@@ -1,29 +1,28 @@
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
-class ClientArp {
-    public static void main(String args[]) {
+public class client{
+    public static void main(String args[]){
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            Socket socket = new Socket(InetAddress.getLocalHost() , 1309);
+            System.out.println("Connected to Server");
+            BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out  = new PrintWriter(socket.getOutputStream(),true);
 
-            Socket clsct = new Socket("127.0.0.1", 5604);
+                System.out.println("Enter ip address : ");
+                String msg = keyboard.readLine();
+                out.println(msg);
 
-            DataInputStream din = new DataInputStream(clsct.getInputStream());
-            DataOutputStream dout = new DataOutputStream(clsct.getOutputStream());
+                String msg1 = in.readLine();
+                if(msg1.equals("MAC Not Found")){
+                    System.out.println("Server : "+ msg1);
+                } else {
+                    System.out.println("Physical address: " + msg1);
+                }
 
-            System.out.println("Enter the Logical address (IP): ");
-            String str1 = in.readLine();
-
-            dout.writeBytes(str1 + "\n");
-
-            String str = din.readLine();
-            System.out.println("The Physical Address is: " + str);
-
-            clsct.close();
-        } 
-        catch (Exception e) {
-            System.out.println(e);
+        } catch (IOException e){
+            System.out.println("Connection Closed : "+e);
         }
     }
 }
