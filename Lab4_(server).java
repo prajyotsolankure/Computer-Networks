@@ -1,52 +1,38 @@
 import java.net.*;
 import java.io.*;
 
-public class EServer {
+public class Main {
+
     public static void main(String args[]) {
-        ServerSocket s = null;
-        Socket c = null;
-        String line;
-        DataInputStream is;
-        PrintStream ps;
-
         try {
-            // Create a server socket listening on port 9000
-            s = new ServerSocket(9000);
-            System.out.println("Server started. Waiting for client...");
-        } 
-        catch (IOException e) {
-            System.out.println("Error creating server socket: " + e);
-            return;
-        }
+            // Create a server socket on port 9000
+            ServerSocket server = new ServerSocket(9000);
+            System.out.println("Server started... Waiting for client...");
 
-        try {
             // Accept client connection
-            c = s.accept();
-            System.out.println("Client connected.");
+            Socket client = server.accept();
+            System.out.println("Client connected!");
 
-            // Create input and output streams
-            is = new DataInputStream(c.getInputStream());
-            ps = new PrintStream(c.getOutputStream());
+            // Input & Output streams
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(client.getInputStream()));
+            PrintWriter out = new PrintWriter(client.getOutputStream(), true);
 
-            // Continuously read messages and echo back to client
-            while (true) {
-                line = is.readLine();
-                if (line == null || line.equalsIgnoreCase("exit")) {
-                    System.out.println("Client disconnected.");
-                    break;
-                }
-                System.out.println("Received from client: " + line);
-                ps.println(line); // Echo the same message
+            // Keep reading & sending back (echo)
+            String message;
+            while ((message = in.readLine()) != null) {
+                System.out.println("Client: " + message);
+                out.println(message);  // Echo back
             }
 
-            // Close resources
-            is.close();
-            ps.close();
-            c.close();
-            s.close();
-        } 
-        catch (IOException e) {
-            System.out.println("I/O Error: " + e);
+            // Close all
+            in.close();
+            out.close();
+            client.close();
+            server.close();
+
+        } catch (IOException e) {
+            System.out.println("Error: " + e);
         }
     }
 }
